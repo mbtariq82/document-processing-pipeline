@@ -1,8 +1,41 @@
-# document-processing-pipeline
-1) Build a real-time transaction scoring API: receive transactions, compute risk features (velocity, amount deviation, geo anomaly), apply rule engine, and return risk score with <100ms latency.
+# Document Processing Pipeline
 
-2) Implement a rule engine: define rules in a DSL/config (if amount > X and velocity > Y then flag), support rule versioning, A/B testing of rule sets, and override capabilities.
+Training implementation of a document processing API. It supports document
+ingestion, text and field extraction, simple entity detection, processing jobs,
+classification, and PII redaction.
 
-3) Create a case management system: flagged transactions become cases, analysts can review/approve/reject, add notes, and the system learns from decisions to improve future scoring.
+## Features
 
-4) Build a feedback loop pipeline: collect analyst decisions, label transactions, retrain models on new data, validate improved performance, and deploy updated model with canary release.
+- Ingest text-like documents with metadata and validation.
+- Extract key-value fields such as invoice numbers and totals.
+- Detect email entities in document content.
+- Run processing jobs that extract text, classify documents, redact email
+  addresses, and update document status.
+- Retrieve documents, extraction results, and processing jobs through an API.
+
+## Run locally
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -e ".[dev]"
+uvicorn document_processing_pipeline.main:app --reload
+```
+
+Open `http://127.0.0.1:8000/docs` for interactive API docs.
+
+## Test
+
+```bash
+pytest
+```
+
+## Key endpoints
+
+- `POST /documents`
+- `GET /documents`
+- `GET /documents/{document_id}`
+- `POST /documents/{document_id}/extract`
+- `GET /documents/{document_id}/extraction`
+- `POST /documents/{document_id}/process`
+- `GET /jobs/{job_id}`
