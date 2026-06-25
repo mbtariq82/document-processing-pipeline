@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from document_processing_pipeline.extraction import ExtractionService
 from document_processing_pipeline.ingestion import IngestionService
 from document_processing_pipeline.processing import ProcessingService
@@ -32,3 +34,17 @@ def test_processing_job_classifies_redacts_and_updates_status() -> None:
     assert processed.redacted_content is not None
     assert "finance@example.com" not in processed.redacted_content
     assert "[redacted-email]" in processed.redacted_content
+
+
+def test_processing_job_does_not_swallow_programming_errors() -> None:
+    class BrokenExtraction:
+        def extract(self, document_id: str):
+            raise RuntimeError("unexpected parser bug")
+
+    repository = DocumentRepository()
+    ingestion = IngestionService(repository)
+    processing = ProcessingService(repository, BrokenExtraction())
+    document = ingestion.ingest("invoice-001.txt", "Invoice Number: INV-001")
+
+    with pytest.raises(RuntimeError):
+        processing.process(document.id)

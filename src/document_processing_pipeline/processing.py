@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from document_processing_pipeline.domain import DocumentStatus, JobStatus, ProcessingJob, utcnow
+from document_processing_pipeline.domain import DocumentError, DocumentStatus, JobStatus, ProcessingJob, utcnow
 from document_processing_pipeline.extraction import ExtractionService
 from document_processing_pipeline.repository import DocumentRepository
 
@@ -31,7 +31,7 @@ class ProcessingService:
             document.status = DocumentStatus.PROCESSED
             document.updated_at = utcnow()
             job.status = JobStatus.COMPLETED
-        except Exception as exc:
+        except DocumentError as exc:
             document.status = DocumentStatus.FAILED
             job.status = JobStatus.FAILED
             job.error = str(exc)
